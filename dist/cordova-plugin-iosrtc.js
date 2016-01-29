@@ -963,8 +963,9 @@ function RTCDataChannel(peerConnection, label, options, dataFromEvent) {
 	if (!dataFromEvent) {
 		debug('new() | [label:%o, options:%o]', label, options);
 
-		if (!label || typeof label !== 'string') {
-			throw new Error('label argument required');
+		// Bug fix: Allow empty string to pass
+		if (typeof label !== 'string') {
+			label = '';
 		}
 
 		options = options || {};
@@ -1068,7 +1069,7 @@ RTCDataChannel.prototype.send = function (data) {
 
 	if (typeof data === 'string' || data instanceof String) {
 		exec(onResultOK, null, 'iosrtcPlugin', 'RTCPeerConnection_RTCDataChannel_sendString', [this.peerConnection.pcId, this.dcId, data]);
-	} else if (window.ArrayBuffer && data instanceof window.ArrayBuffer) {
+	} else if (window.ArrayBuffer && data.constructor.name === "ArrayBuffer") {
 		exec(onResultOK, null, 'iosrtcPlugin', 'RTCPeerConnection_RTCDataChannel_sendBinary', [this.peerConnection.pcId, this.dcId, data]);
 	} else if (
 		(window.Int8Array && data instanceof window.Int8Array) ||
@@ -3339,8 +3340,8 @@ function _dispatchEvent(event) {
 	}
 	event._dispatched = true;
 
-	// Force the event to be cancelable.
-	event.cancelable = true;
+	// Bugfix: Do not force the event to be cancelable.
+	// event.cancelable = true;
 	event.target = this;
 
 	// Override stopImmediatePropagation() function.
