@@ -963,7 +963,7 @@ function RTCDataChannel(peerConnection, label, options, dataFromEvent) {
 	if (!dataFromEvent) {
 		debug('new() | [label:%o, options:%o]', label, options);
 
-		// Bug fix: Allow empty string to pass
+		// Bugfix: Allow empty string to pass
 		if (typeof label !== 'string') {
 			label = '';
 		}
@@ -1130,7 +1130,13 @@ function onEvent(data) {
 			this.id = data.channel.id;
 			this.readyState = data.channel.readyState;
 			this.bufferedAmount = data.channel.bufferedAmount;
-			break;
+
+                        // Bugfix: onopen event is never fired if the data channel
+                        // is open to begin with so we fire the event here.
+                        if(this.readyState === 'open'){
+                                 this.dispatchEvent(new Event('open'));
+                        }
+                        break;
 
 		case 'statechange':
 			this.readyState = data.readyState;
